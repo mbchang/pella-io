@@ -1,10 +1,6 @@
 from midiutil.MidiFile3 import MIDIFile
 
-def read_input_information():
-	pass
-
-
-def construct_midi(filename, bpm, trackname, notes):
+def construct_midi(filename, bpm, trackname, beat_intervals):
 	# Create a MIDI with one track
 	MyMIDI = MIDIFile(1)
 
