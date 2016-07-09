@@ -6,7 +6,8 @@ print('#'*180)
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
-audio_path = '../audio/twinkle_twinkle.mp3'
+# audio_path = '../audio/twinkle_twinkle.mp3'
+audio_path = '../audio/.mp3'
 y, sr = librosa.load(audio_path)
 
 # mel spectrogram
@@ -138,6 +139,7 @@ def get_notes(cgram, threshold):
     for row in cgramT:
         row[row > threshold] = 1
         row[row <= threshold] = 0
+
     return cgramT
 
 def beat_track(y_percussive, sr, log_S):
@@ -164,7 +166,11 @@ if __name__ == "__main__":
     tempo, beats = beat_track(y_percussive, sr, log_S)
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
-    notes = get_notes(chroma_sync_gram, 0.7)
+    notes = [0] + get_notes(chroma_sync_gram, 0.7)
+    # assert(len(beats) == len(notes)) // Something is incorrect right now, but hack to fix it. 
     print(notes)
     print(beats)
     res = np.array([beats, notes])
+    print(len(notes))
+    print(len(beats))
+    print(res)
