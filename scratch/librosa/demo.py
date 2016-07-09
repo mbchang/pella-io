@@ -1,8 +1,11 @@
 from __future__ import print_function
 import numpy as np
+import os
 import librosa
 import matplotlib.pyplot as plt
 print('#'*180)
+
+print(os.path.abspath())
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
@@ -117,7 +120,7 @@ def feature_sync(M, beats, show=False):
 
 def chroma_sync(C, beats, aggregate=np.median, show=True):
     C_sync = librosa.feature.sync(C, beats, aggregate=np.median)
-    print(C_sync)
+    print('C_sync', C_sync.shape)
 
     if show == True:
         plt.figure(figsize=(12,6))
@@ -143,38 +146,6 @@ def get_notes(cgram, threshold):
         row[row > threshold] = 1
         row[row <= threshold] = 0
     return cgramT
-
-def mfcc():
-    # Next, we'll extract the top 13 Mel-frequency cepstral coefficients (MFCCs)
-    mfcc        = librosa.feature.mfcc(S=log_S, n_mfcc=13)
-
-    # Let's pad on the first and second deltas while we're at it
-    delta_mfcc  = librosa.feature.delta(mfcc)
-    delta2_mfcc = librosa.feature.delta(mfcc, order=2)
-
-    # How do they look?  We'll show each in its own subplot
-    plt.figure(figsize=(12, 6))
-
-    plt.subplot(3,1,1)
-    librosa.display.specshow(mfcc)
-    plt.ylabel('MFCC')
-    plt.colorbar()
-
-    plt.subplot(3,1,2)
-    librosa.display.specshow(delta_mfcc)
-    plt.ylabel('MFCC-$\Delta$')
-    plt.colorbar()
-
-    plt.subplot(3,1,3)
-    librosa.display.specshow(delta2_mfcc, sr=sr, x_axis='time')
-    plt.ylabel('MFCC-$\Delta^2$')
-    plt.colorbar()
-
-    plt.tight_layout()
-
-    # For future use, we'll stack these together into one matrix
-    M = np.vstack([mfcc, delta_mfcc, delta2_mfcc])
-    return M
 
 def decompose(y):
     # How about something more advanced?  Let's decompose a spectrogram with NMF, and then resynthesize an individual component
@@ -239,6 +210,6 @@ if __name__ == "__main__":
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
     notes = get_notes(chroma_sync_gram, 0.7)
-    print(notes)
-    print(beats)
+    print('notes', notes.shape)
+    print('beats',beats.shape)
     res = np.array([beats, notes])
