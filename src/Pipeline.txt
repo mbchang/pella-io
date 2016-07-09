@@ -1,6 +1,0 @@
-Steps:
-1. Detect beats from songs
-2. Map interbeat-intervals into notes. Fit notes to known minor/major chords. Map chords into vocal SATB parts
-3. Write whole-note chords into MIDI
-4. For each chord, modify to reflect rhythmic changes in the song
-5. 

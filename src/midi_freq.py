@@ -1,7 +1,7 @@
 # Create mapping from midi number (int) to frequency (float)
 import re
 
-infile = open('midi_freq_num.txt')
+infile = open('data/midi_freq_num.txt')
 
 midi_num_to_freq = {}
 infile.readline() # Skip Source attribute

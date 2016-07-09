@@ -1,21 +1,25 @@
 from midiutil.MidiFile3 import MIDIFile
 
-# Options
-FILENAME = 'output.mid'
-BPM = 120
-TRACKNAME = "Demo"
+def read_input_information():
+	pass
 
-# Create a MIDI with one track
-MyMIDI = MIDIFile(1)
 
-track = 0 
-time = 0
-MyMIDI.addTrackName(track, time, TRACKNAME) 
-MyMIDI.addTempo(track, time, BPM)
+def construct_midi(filename, bpm, trackname, notes):
+	# Create a MIDI with one track
+	MyMIDI = MIDIFile(1)
 
-TIME_COUNTER = 0
+	track = 0 
+	time = 0
+	MyMIDI.addTrackName(track, time, trackname) 
+	MyMIDI.addTempo(track, time, bpm)
 
-def add_measure(notes, time_counter):
+	TIME_COUNTER = 0
+
+	binfile = open("../output/" + filename, 'wb') 
+	MyMIDI.writeFile(binfile) 
+	binfile.close()
+
+def _add_measure(notes_for_measure, time_counter, my_midi):
 	channel = 0
 	for note in notes:
 		track = 0 
@@ -23,16 +27,9 @@ def add_measure(notes, time_counter):
 		time_offset = time_counter
 		duration = 4 
 		volume = 100
-		MyMIDI.addNote(track,channel,pitch,time_offset,duration,volume)
+		my_midi.addNote(track,channel,pitch,time_offset,duration,volume)
 		channel += 1
 	time_counter += 4
-	print time_counter
 	return time_counter
 
-TIME_COUNTER = add_measure([60, 64, 67, 72], TIME_COUNTER)
-TIME_COUNTER = add_measure([60, 64, 67, 72], TIME_COUNTER)
-TIME_COUNTER = add_measure([60, 64, 67, 72], TIME_COUNTER)
 
-binfile = open("../output/" + FILENAME, 'wb') 
-MyMIDI.writeFile(binfile) 
-binfile.close()

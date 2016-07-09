@@ -4,4 +4,6 @@
 """
 
 def main():
-	
+	# Initialize the MIDI
+	# Mocked: beat_intervals = get_beat_intervals(filename)
+	pass
