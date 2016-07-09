@@ -3,14 +3,15 @@ import numpy as np
 import os
 import librosa
 import matplotlib.pyplot as plt
+from audio_models import BeatInterval
 print('#'*180)
 
-print(os.path.abspath())
+# print(os.path.abspath())
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
 # audio_path = '../audio/twinkle_twinkle.mp3'
-audio_path = '../audio/.mp3'
+audio_path = 'audio/twinkle_twinkle.mp3'
 y, sr = librosa.load(audio_path)
 y_mono = librosa.to_mono(y)
 print('y', y.shape)
@@ -218,3 +219,18 @@ if __name__ == "__main__":
     print('beats',beats.shape)
     res = np.array([beats, notes])
     print(res)
+
+freq_conversions = np.array([261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88])
+
+def getBeatIntervalsFromNotes(notes_mask):
+    beatIntervals = []
+    for i in range(notes_mask.shape[0]):
+        j = 0
+        while notes_mask[i][j] == 0:
+            j += 1
+            if j == notes_mask.shape[1]:
+                break
+        lowest_freq = freq_conversions[j]
+        frequencies = freq_conversions[notes_mask[i]]
+        nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
+        beatIntervals.append(nextBeatInterval)
