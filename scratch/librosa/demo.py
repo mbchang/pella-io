@@ -6,7 +6,7 @@ print('#'*180)
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
-audio_path = '../audio/Africa.mp3'
+audio_path = '../audio/twinkle_twinkle.mp3'
 y, sr = librosa.load(audio_path)
 
 # mel spectrogram
@@ -40,6 +40,7 @@ def harmonics_and_percussive(y, sr):
     plt.title('mel power spectrogram (Percussive)')
     plt.colorbar(format='%+02.0f dB')
     plt.tight_layout()
+    # plt.show() -- if you have matplotlib.pyplot
     plt.savefig('harmonics and percussive.png')
     return y_harmonic, y_percussive
 
@@ -52,6 +53,7 @@ def chromagram(y_harmonic, sr):
     plt.title('Chromagram')
     plt.colorbar()
     plt.tight_layout()
+    plt.show()
     plt.savefig('Chromagram.png')
 
 y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
