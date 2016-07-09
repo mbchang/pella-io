@@ -65,10 +65,84 @@ def chromagram(y_harmonic, sr):
     plt.savefig('chromagram.png')
     return C
 
+# mel frequency cepstral coefficients
+def mfcc(log_S, n_mfcc=13, show=False):
+    mfcc = librosa.feature.mfcc(S=log_S, n_mfcc=13)
+
+    delta_mfcc  = librosa.feature.delta(mfcc)
+    delta2_mfcc = librosa.feature.delta(mfcc, order=2)
+
+    if show == True:
+        plt.figure(figsize=(12, 6))
+        plt.subplot(3,1,1)
+        librosa.display.specshow(mfcc)
+        plt.ylabel('MFCC')
+        plt.colorbar()
+        plt.subplot(3,1,2)
+        librosa.display.specshow(delta_mfcc)
+        plt.ylabel('MFCC-$\Delta$')
+        plt.colorbar()
+        plt.subplot(3,1,3)
+        librosa.display.specshow(delta2_mfcc, sr=sr, x_axis='time')
+        plt.ylabel('MFCC-$\Delta^2$')
+        plt.colorbar()
+        plt.tight_layout()
+        plt.savefig('mfcc.png')
+
+    # For future use, we'll stack these together into one matrix
+    M = np.vstack([mfcc, delta_mfcc, delta2_mfcc])
+
+    return delta_mfcc, delta2_mfcc, M
+
+def feature_sync(M, beats, show=False):
+    M_sync = librosa.feature.sync(M, beats)
+
+    if show == True:
+        plt.figure(figsize=(12,6))
+        plt.subplot(2,1,1)
+        librosa.display.specshow(M)
+        plt.title('MFCC-$\Delta$-$\Delta^2$')
+        plt.yticks(np.arange(0, M.shape[0], 13), ['MFCC', '$\Delta$', '$\Delta^2$'])
+        plt.colorbar()
+        plt.subplot(2,1,2)
+        librosa.display.specshow(M_sync)
+        librosa.display.time_ticks(librosa.frames_to_time(beats, sr=sr))
+        plt.yticks(np.arange(0, M_sync.shape[0], 13), ['MFCC', '$\Delta$', '$\Delta^2$'])
+        plt.title('Beat-synchronous MFCC-$\Delta$-$\Delta^2$')
+        plt.colorbar()
+        plt.tight_layout()
+        plt.savefig('feature_sync.png')
+
+    return M_sync
+
+def chroma_sync(C, beats, aggregate=np.median, show=True):
+    C_sync = librosa.feature.sync(C, beats, aggregate=np.median)
+    print(C_sync)
+
+    if show == True:
+        plt.figure(figsize=(12,6))
+        plt.subplot(2, 1, 1)
+        librosa.display.specshow(C, sr=sr, y_axis='chroma', vmin=0.0, vmax=1.0, x_axis='time')
+        plt.title('Chroma')
+        plt.colorbar()
+        plt.subplot(2, 1, 2)
+        librosa.display.specshow(C_sync, y_axis='chroma', vmin=0.0, vmax=1.0)
+        beat_times = librosa.frames_to_time(beats, sr=sr)
+        librosa.display.time_ticks(beat_times)
+        plt.title('Beat-synchronous Chroma (median aggregation)')
+        plt.colorbar()
+        plt.tight_layout()
+        plt.savefig('chroma_sync.png')
+    return C_sync
+
 # get notes
 # output: (timesteps, notes)
-def get_notes(cgram):
-    pass
+def get_notes(cgram, threshold):
+    cgramT = np.transpose(cgram)
+    for row in cgramT:
+        row[row > threshold] = 1
+        row[row <= threshold] = 0
+    return cgramT
 
 def mfcc():
     # Next, we'll extract the top 13 Mel-frequency cepstral coefficients (MFCCs)
@@ -148,7 +222,6 @@ def beat_track(y_percussive, sr, log_S):
     plt.tight_layout()
     return tempo, beats
 
-
 # input: binary mask (timestamps, num_notes)
 # TODO: chromagram to audio timeseries
 def notes2mp3():
@@ -156,9 +229,16 @@ def notes2mp3():
     # 2 save
     pass
 
-if __name__=="__main__":
+if __name__ == "__main__":
     log_S = mel_spetrogram(y, sr)
     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
     cgram = chromagram(y_harmonic, sr)
     tempo, beats = beat_track(y_percussive, sr, log_S)
     components, activaions = decompose(y)
+
+    delta_mfcc, delta2_mfcc, M = mfcc(log_S)
+    chroma_sync_gram = chroma_sync(cgram, beats)
+    notes = get_notes(chroma_sync_gram, 0.7)
+    print(notes)
+    print(beats)
+    res = np.array([beats, notes])
