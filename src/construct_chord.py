@@ -1,7 +1,16 @@
-from midi_models import AcappellaMeasure
+from midi_models import AcappellaMeasure, AcappellaNote
 
 def chord_from_beat(beat_interval):
-	bass, tenor, alto, soprano = beat_interval.frequencies
-	am = AcappellaMeasure(bass, tenor, alto, soprano)
-	
+	BEATS_PER_MEASURE = 4
+	parts = []
+	for i in range(len(beat_interval.frequencies)):
+		freq = beat_interval.frequencies[i]
+		mult = beat_interval.multiplicities[i]
+		notes = []
+		for i in range(mult):
+			notes.append(AcappellaNote(freq, int(BEATS_PER_MEASURE/mult)))
+		parts.append(notes)
+	am = AcappellaMeasure(*parts)
+	return am 
+
 

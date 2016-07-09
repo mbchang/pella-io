@@ -24,7 +24,7 @@ def main():
 		frequencies,
 		multiplicity
 	)
-	beats = [bi, bi, bi]
+	beats = [bi, bi, bi, bi]
 	construct_midi(FILENAME, BPM, TRACKNAME, beats)
 
 main()

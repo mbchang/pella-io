@@ -12,7 +12,6 @@ for line in infile:
 			lambda ele: not re.search('[a-zA-Z]', ele),
 			components
 		)
-		print components
 		i = 0
 		while i < len(components):
 			midi_int = int(components[i])
