@@ -8,6 +8,10 @@ print('#'*180)
 audio_path = librosa.util.example_audio_file()
 audio_path = '../audio/twinkle_twinkle.mp3'
 y, sr = librosa.load(audio_path)
+y_mono = librosa.to_mono(y)
+print('y', y.shape)
+print('sr', sr)
+print('y_mono', y_mono.shape)
 
 # mel spectrogram
 def mel_spetrogram(y, sr):
@@ -66,6 +70,67 @@ def chromagram(y_harmonic, sr):
 def get_notes(cgram):
     pass
 
+def mfcc():
+    # Next, we'll extract the top 13 Mel-frequency cepstral coefficients (MFCCs)
+    mfcc        = librosa.feature.mfcc(S=log_S, n_mfcc=13)
+
+    # Let's pad on the first and second deltas while we're at it
+    delta_mfcc  = librosa.feature.delta(mfcc)
+    delta2_mfcc = librosa.feature.delta(mfcc, order=2)
+
+    # How do they look?  We'll show each in its own subplot
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(3,1,1)
+    librosa.display.specshow(mfcc)
+    plt.ylabel('MFCC')
+    plt.colorbar()
+
+    plt.subplot(3,1,2)
+    librosa.display.specshow(delta_mfcc)
+    plt.ylabel('MFCC-$\Delta$')
+    plt.colorbar()
+
+    plt.subplot(3,1,3)
+    librosa.display.specshow(delta2_mfcc, sr=sr, x_axis='time')
+    plt.ylabel('MFCC-$\Delta^2$')
+    plt.colorbar()
+
+    plt.tight_layout()
+
+    # For future use, we'll stack these together into one matrix
+    M = np.vstack([mfcc, delta_mfcc, delta2_mfcc])
+    return M
+
+def decompose(y):
+    # How about something more advanced?  Let's decompose a spectrogram with NMF, and then resynthesize an individual component
+    D = librosa.stft(y)
+
+    # Separate the magnitude and phase
+    S, phase = librosa.magphase(D)
+
+    # Decompose by nmf
+    components, activations = librosa.decompose.decompose(S, n_components=8, sort=True)
+
+    plt.figure(figsize=(12,4))
+
+    plt.subplot(1,2,1)
+    librosa.display.specshow(librosa.logamplitude(components**2.0, ref_power=np.max), y_axis='log')
+    plt.xlabel('Component')
+    plt.ylabel('Frequency')
+    plt.title('Components')
+
+    plt.subplot(1,2,2)
+    librosa.display.specshow(activations)
+    plt.xlabel('Time')
+    plt.ylabel('Component')
+    plt.title('Activations')
+
+    plt.tight_layout()
+    plt.savefig('components_activations.png')
+
+    return components, activations
+
 def beat_track(y_percussive, sr, log_S):
     # Now, let's run the beat tracker.
     # We'll use the percussive component for this part
@@ -83,8 +148,17 @@ def beat_track(y_percussive, sr, log_S):
     plt.tight_layout()
     return tempo, beats
 
-if __name__="__main__":
+
+# input: binary mask (timestamps, num_notes)
+# TODO: chromagram to audio timeseries
+def notes2mp3():
+    # 1 convert it back to frequency/spectrogram
+    # 2 save
+    pass
+
+if __name__=="__main__":
     log_S = mel_spetrogram(y, sr)
     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
     cgram = chromagram(y_harmonic, sr)
     tempo, beats = beat_track(y_percussive, sr, log_S)
+    components, activaions = decompose(y)
