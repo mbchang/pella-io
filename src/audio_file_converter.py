@@ -1,22 +1,23 @@
 from __future__ import print_function
 import numpy as np
 import os
+import pprint
 import librosa
 import matplotlib.pyplot as plt
-from audio_models import BeatInterval
 print('#'*180)
 
-# print(os.path.abspath())
+print(os.path.abspath(librosa.__file__))
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
 # audio_path = '../audio/twinkle_twinkle.mp3'
-audio_path = 'audio/twinkle_twinkle.mp3'
+audio_path = '../audio/.mp3'
 y, sr = librosa.load(audio_path)
 y_mono = librosa.to_mono(y)
 print('y', y.shape)
 print('sr', sr)
 print('y_mono', y_mono.shape)
+# assert(False)
 
 # mel spectrogram
 def mel_spetrogram(y, sr):
@@ -150,7 +151,7 @@ def get_notes(cgram, threshold):
 
     return cgramT
 
-def decompose(y):
+def decompose(y, n_components=8):
     # How about something more advanced?  Let's decompose a spectrogram with NMF, and then resynthesize an individual component
     D = librosa.stft(y)
 
@@ -158,7 +159,7 @@ def decompose(y):
     S, phase = librosa.magphase(D)
 
     # Decompose by nmf
-    components, activations = librosa.decompose.decompose(S, n_components=8, sort=True)
+    components, activations = librosa.decompose.decompose(S, n_components, sort=True)
 
     plt.figure(figsize=(12,4))
 
@@ -177,7 +178,27 @@ def decompose(y):
     plt.tight_layout()
     plt.savefig('components_activations.png')
 
-    return components, activations
+    print('components', components.shape)
+    print('activations', activations.shape)
+    return components, activations, phase
+
+def reconstruct(components, activations, phase):
+    # Play back the reconstruction
+    # Reconstruct a spectrogram by the outer product of component k and its activation
+    D_k = components.dot(activations)
+
+    # invert the stft after putting the phase back in
+    y_k = librosa.istft(D_k * phase)
+    return y_k
+
+# is there a way to get the frequency range?
+def get_freq_component(y, k=4):
+    components, activations, phase = decompose(y)
+    D_k = np.multiply.outer(components[:, k], activations[k])
+
+    # invert the stft after putting the phase back in
+    y_k = librosa.istft(D_k * phase)
+    return y_k
 
 def beat_track(y_percussive, sr, log_S):
     # Now, let's run the beat tracker.
@@ -203,34 +224,62 @@ def notes2mp3():
     # 2 save
     pass
 
+# index freq_map. assume we start at c1
+def notes2freq(notes):
+    # notes (num_notes, timesteps); may not be onehot
+    # map: (num_notes)
+    # output: (timesteps)
+    freqs = []
+    freq_map = getFreqMap(notes.shape[0])
+    timesteps = notes.shape[1]
+    for t in timesteps:
+        freqs.append(freq_map[notes[t] > 0])
+    return freqs
+
+# assume we start at c1
+def getFreqMap(num_octaves):
+    freqMap = np.zeros(84)
+    freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+
+    for i in range(1, num_octaves - 1):
+        lo = 12 * (i - 1)
+        med = 12 * i
+        hi = 12 * (i + 1)
+        print(lo, med, hi)
+        freqMap[med : hi] = freqMap[lo : med] * 2
+
+    return freqMap
+
+def getBeatIntervalsFromNotes(notes_mask, beats):
+    freqs= notes2freq(notes_mask)  # (timesteps, num_freqs) list
+    beats = [0]+beats  # (num_beats), not necessarily timesteps
+    timesteps = len(freqs)
+
+    beatIntervals = []
+    for i in range(timesteps):
+        lowest_freq = min(freqs)
+        frequenceis = freqs[i]
+        nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
+        beatIntervals.append(nextBeatInterval)
+    return beatIntervals
+
+
 if __name__ == "__main__":
     log_S = mel_spetrogram(y, sr)
     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
     cgram = chromagram(y_harmonic, sr)
     tempo, beats = beat_track(y_percussive, sr, log_S)
-    components, activaions = decompose(y)
+    # components, activaions = decompose(y)
 
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
-    # assert(len(beats) == len(notes)) // Something is incorrect right now, but hack to fix it. 
-    print(notes)
-    print(beats)
-    print('notes', notes.shape)
+    notes = get_notes(chroma_sync_gram, 0.7)
+    freqs = notes2freq(notes)
+
+    beatIntevals = getBeatIntervalsFromNotes(notes, beats)
+    # for_tejas = (freqs, beats)
+
     print('beats',beats.shape)
+    # res = np.array([beats, notes])
     res = np.array([beats, notes])
     print(res)
-
-freq_conversions = np.array([261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88])
-
-def getBeatIntervalsFromNotes(notes_mask):
-    beatIntervals = []
-    for i in range(notes_mask.shape[0]):
-        j = 0
-        while notes_mask[i][j] == 0:
-            j += 1
-            if j == notes_mask.shape[1]:
-                break
-        lowest_freq = freq_conversions[j]
-        frequencies = freq_conversions[notes_mask[i]]
-        nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
-        beatIntervals.append(nextBeatInterval)
