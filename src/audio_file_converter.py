@@ -11,7 +11,7 @@ print(os.path.abspath(librosa.__file__))
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
-audio_path = '../src/audio/twinkle_twinkle.mp3'
+audio_path = '../src/audio/medium.m4a'
 # audio_path = '../audio/.mp3'
 y, sr = librosa.load(audio_path)
 y_mono = librosa.to_mono(y)
@@ -147,6 +147,9 @@ def chroma_sync(C, beats, aggregate=np.median, show=True):
 def get_notes(cgram, threshold):
     cgramT = np.transpose(cgram)
     for row in cgramT:
+        #top3 = row.argsort()[-3:][::-1]
+        #row = np.zeros(len(row))
+        #row[top3] = 1
         row[row > threshold] = 1
         row[row <= threshold] = 0
 
@@ -236,14 +239,19 @@ def notes2freq(notes):
     assert num_freqs%12 == 0
     freq_map = getFreqMap(num_freqs/12)
     for t in range(timesteps):
-        freqs.append(freq_map[notes[t] > 0])
+        freq_tmp = freq_map[notes[t] > 0]
+        if len(freq_tmp) == 0:
+            freq_tmp = np.array([0])
+        print(freq_tmp)
+        freqs.append(freq_tmp)
+    print('freqs', freqs)
     return freqs
 
 # assume we start at c1
 def getFreqMap(num_octaves):
     freqMap = np.zeros(num_octaves*12)
     freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
-
+    freqMap = freqMap * 4
     for i in range(1, num_octaves - 1):
         lo = 12 * (i - 1)
         med = 12 * i
@@ -254,12 +262,13 @@ def getFreqMap(num_octaves):
     return freqMap
 
 def getBeatIntervalsFromNotes(notes_mask, beats):
-    freqs= notes2freq(notes_mask)  # (timesteps, num_freqs) list
+    freqs = notes2freq(notes_mask)  # (timesteps, num_freqs) list
     beats = [0]+beats  # (num_beats), not necessarily timesteps
     timesteps = len(freqs)
 
     beatIntervals = []
     for i in range(timesteps):
+        print(freqs[i])
         lowest_freq = min(freqs[i])
         frequencies = freqs[i]
         mults = [1 for i in frequencies]
@@ -277,13 +286,12 @@ def getTwinkle():
 
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
-    notes = get_notes(chroma_sync_gram, 0.7)
+    notes = get_notes(chroma_sync_gram, 0.5)
     # print(notes.shape)
     freqs = notes2freq(notes)
 
     beatIntervals = getBeatIntervalsFromNotes(notes, beats)
     # for_tejas = (freqs, beats)
-
     print('beats',beats.shape)
     # res = np.array([beats, notes])
     res = np.array([beats, notes])
