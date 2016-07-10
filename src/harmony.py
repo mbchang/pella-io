@@ -390,4 +390,4 @@ class SpecifiedChord(Chord):
 m = Music("C", ["F"],[])
 # print(m.get_specified_chord_from_note_and_chord("F#4", ('D', 'F#', 'A'), previous_specified_chord=None))
 # print(m.harmonize_one_note([m.seed_notes[0]+'4'], 1000))
-print(m.harmonize_melody(["A4", "E4", "G4", "B4", "A4", "F4","G4"]))
+print(m.harmonize_melody(["A4", "E4", "G4", "B4", "A4", "F4","G4"]*100))
