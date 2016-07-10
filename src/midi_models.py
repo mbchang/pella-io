@@ -9,7 +9,7 @@ class AcappellaMeasure:
 	"""Represents a 4-part measure of an a cappella arrangement.
 	   All attributes are lists of AcappellaNotes
 	"""
-	def __init__(self, bass, tenor, alto, soprano):
+	def __init__(self, bass=None, tenor=None, alto=None, soprano=None):
 		self.bass = bass
 		self.tenor = tenor
 		self.alto = alto
@@ -24,9 +24,17 @@ class AcappellaNote:
 		self.duration = duration
 
 	def compute_midi_num(self):
+		closest_note = None
+		distance_to_note = None
 		for midi_num in midi_num_to_freq:
-			if midi_num_to_freq[midi_num] == self.freq:
-				self.midi_num = midi_num
+			distance_to_this_note = abs(self.freq - midi_num_to_freq[midi_num])
+			if not closest_note:
+				closest_note = midi_num
+				distance_to_note = distance_to_this_note
+			elif distance_to_this_note < distance_to_note:
+				closest_note = midi_num
+				distance_to_note = distance_to_this_note
+		self.midi_num = closest_note
 
 
 

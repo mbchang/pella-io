@@ -37,6 +37,9 @@ def _add_measure(acappella_measure, time_counter, my_midi):
 	attrs = ['bass', 'tenor', 'soprano', 'alto']
 	for attr in attrs:
 		notes = getattr(acappella_measure, attr)
+		if not notes:
+			print "Warning, not all 4 parts detected"
+			continue
 		time_offset = time_counter
 		for note in notes:
 			pitch = note.midi_num
