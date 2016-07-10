@@ -7,10 +7,23 @@ INPUT_MIDI = 'data/snippet10.mid'
 OUTPUT_FILE = 'data/output.mid'
 
 def parse_to_mid(input_file):
+	beatIntervals = getBeatIntervals(input_file)
 	extension = input_file.split(".")[-1]
 	if extension == ".mid":
 		return
-	
+	pattern = midi_library.Pattern()
+	tick = 0
+	TICKS_PER_BEAT = pattern.resolution
+	BEATS_PER_MIN = 
+	track = midi.Track()
+	track.make_ticks_abs()
+	pattern.append(track)
+	for beat in beatIntervals:
+		nc = Chord(None, None, None, None)
+		pitch = nc.compute_midi_num(beat.frequency)
+		duration = 
+		on = midi.NoteOnEvent(tick=0, velocity=100, pitch=midi.G_3)
+
 
 
 def main(input_midi):
