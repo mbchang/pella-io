@@ -14,19 +14,10 @@ def main():
 	# Initialize the MIDI
 	# Mocked: beat_intervals
 	# Use: beat_intervals = get_beat_intervals(filename)
-	lowest_frequency = 261.6255653006
-	frequencies = [
-		261.6255653006, 329.6275569129,
-		391.9954359817, 523.2511306012
-	]
-	multiplicity = [1, 1, 1, 1]
-	bi = BeatInterval(
-		lowest_frequency,
-		frequencies,
-		multiplicity
-	)
+
 	#beats = [bi, bi, bi, bi, bi]
 	beatIntervals = getTwinkle()
-	construct_midi(FILENAME, BPM, TRACKNAME, beatIntervals)
+
+	construct_midi_from_chords(FILENAME, BPM, TRACKNAME, chords)
 
 main()
