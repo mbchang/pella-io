@@ -203,27 +203,37 @@ def notes2mp3():
     # 2 save
     pass
 
-if __name__ == "__main__":
-    log_S = mel_spetrogram(y, sr)
-    y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
-    cgram = chromagram(y_harmonic, sr)
-    tempo, beats = beat_track(y_percussive, sr, log_S)
-    components, activaions = decompose(y)
+# if __name__ == "__main__":
+#     log_S = mel_spetrogram(y, sr)
+#     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
+#     cgram = chromagram(y_harmonic, sr)
+#     tempo, beats = beat_track(y_percussive, sr, log_S)
+#     components, activaions = decompose(y)
 
-    delta_mfcc, delta2_mfcc, M = mfcc(log_S)
-    chroma_sync_gram = chroma_sync(cgram, beats)
-    # assert(len(beats) == len(notes)) // Something is incorrect right now, but hack to fix it. 
-    print(notes)
-    print(beats)
-    print('notes', notes.shape)
-    print('beats',beats.shape)
-    res = np.array([beats, notes])
-    print(res)
+#     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
+#     chroma_sync_gram = chroma_sync(cgram, beats)
+#     # assert(len(beats) == len(notes)) // Something is incorrect right now, but hack to fix it. 
+#     print(notes)
+#     print(beats)
+#     print('notes', notes.shape)
+#     print('beats',beats.shape)
+#     res = np.array([beats, notes])
+#     print(res)
 
 freq_conversions = np.array([16.35, 17.32, 18.35, 19.45, 20.60, 21.83, 23.12, 24.50, 25.96, 27.50, 29.14, 30.87, 32.70, 34.65, 36.71, 38.89, 41.20, 43.65, 46.25, 49.00, 51.91, 55.00, 58.27, 61.74, 65.41, 69.30, 73.42, 77.78, 82.41, 87.31, 92.50, 98.00, 103.83, 110.00, 116.54, 261.63, 277.18, 293.66, 311.13, 329.63, 349.23, 369.99, 392.00, 415.30, 440.00, 466.16, 493.88])
 
 def getFreqMap(num_octaves):
-    firstOctave = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+    freqMap = np.zeros(84)
+    freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+
+    for i in range(1, num_octaves - 1):
+        lo = 12 * (i - 1)
+        med = 12 * i
+        hi = 12 * (i + 1)
+        print(lo, med, hi)
+        freqMap[med : hi] = freqMap[lo : med] * 2
+
+    return freqMap
 
 def getBeatIntervalsFromNotes(notes_mask):
     beatIntervals = []
