@@ -1,7 +1,7 @@
 import midi_library
 
 # Make the backgrounds softer than the solo
-CHORD_VELOCITY = 50 
+CHORD_VELOCITY = 75
 
 def write_chords_to_pattern(chords, pattern):
 	ATTRS = ['low', 'mid', 'high', 'highest']
@@ -108,10 +108,106 @@ def get_notes_by_style(note, ticks_timestamp, pattern, measure):
 			pitch=note.pitch
 		)
 		return [on, off, on_2, off_2, on_3, off_3, on_4, off_4]
+	elif note.style == "HALF":
+		on = midi_library.NoteOnEvent(
+			tick=ticks_timestamp,
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + measure/2, 
+			pitch=note.pitch
+		)
+		on_2 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + measure/2 + 1,
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off_2 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + measure, 
+			pitch=note.pitch
+		)
+		return [on, off, on_2, off_2]
+	elif note.style =='SYNCO1':
+		on = midi_library.NoteOnEvent(
+			tick=ticks_timestamp,
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + measure/4, 
+			pitch=note.pitch
+		)
+		on1 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + measure/4 + 1, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off1 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + 5*measure/8, 
+			pitch=note.pitch
+		)
+		on2 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + 5*measure/8 + 1, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off2 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + 3*measure/4, 
+			pitch=note.pitch
+		)
+		on3 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + 3*measure/4+1, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off3 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + 7*measure/8, 
+			pitch=note.pitch
+		)
+		on4 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + 7*measure/8, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off4 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + measure, 
+			pitch=note.pitch
+		)
+		return [on, off, on1, off1, on2, off2, on3, off3, on4, off4]
+	elif note.style =='SYNCO2':
+		on = midi_library.NoteOnEvent(
+			tick=ticks_timestamp,
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + 3*measure/8, 
+			pitch=note.pitch
+		)
+		on1 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + 3*measure/8 + 1, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off1 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + 3*measure/4, 
+			pitch=note.pitch
+		)
+		on2 = midi_library.NoteOnEvent(
+			tick=ticks_timestamp + 3*measure/4 + 1, 
+			velocity=CHORD_VELOCITY,
+			pitch=note.pitch
+		)
+		off2 = midi_library.NoteOffEvent(
+			tick=ticks_timestamp + measure, 
+			pitch=note.pitch
+		)
+		return [on, off, on1, off1, on2, off2]
+
 
 
 def write_midifile(midifile, pattern):
 	pattern[0].make_ticks_abs()
 	pattern.make_ticks_rel()
-	print pattern
 	midi_library.write_midifile(midifile, pattern)

@@ -3,7 +3,7 @@ from read_midi import read_midi_by_measure
 from create_chords import create_chords
 from write_midi import write_midifile, write_chords_to_pattern
 
-INPUT_MIDI = 'data/snippet4.mid'
+INPUT_MIDI = 'data/snippet10.mid'
 OUTPUT_FILE = 'data/output.mid'
 
 
