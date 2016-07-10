@@ -88,7 +88,7 @@ class Music(object):
         on the proceeding note.
         note here is a note
         """
-        chords = self.key.c_chord_given_c_note(note)
+        chords = self.key.c_chord_given_c_note(note[:-1])
         idxs = []
         for j in range(len(chords)):
             for i in range(len(self.key.chords)):
@@ -97,6 +97,7 @@ class Music(object):
 
         idxs = list(set(idxs))
 
+        chord = self.specified_chord_to_chord(chord)
         cond_dist_dict = self.chord_chord_map[chord] # Gets list of candidate chords
         next_chords = sorted(cond_dist_dict.keys())
         next_probs = [cond_dist_dict[next_chord] for next_chord in next_chords]
@@ -111,7 +112,7 @@ class Music(object):
 
 
         cond_dist = stats.rv_discrete(name='cond_dist', values=(true_next_chords, true_next_probs))
-        return cond_dist.rvs(size=1)
+        return self.key.chords[cond_dist.rvs(size=1)-1]
 
 
     # abs value
@@ -216,7 +217,18 @@ class Music(object):
         # 5 GOTO2
         assert len(seed_notes) > 1, "you are likely using the wrong function -- you either have more than one seed note, or an empty seed_notes list"
 
-        pass
+        chords = []
+
+        seed_note = seed_notes[0]
+        specified_chord = self.get_specified_chord_from_note_and_chord(seed_note, random.choice(self.key.c_chord_given_c_note(seed_note[:-1])))
+        chords.append(specified_chord)
+        for s in range(1,len(seed_notes)):
+            next_chord = self.get_next_chord_conditional(specified_chord, seed_notes[s])
+            # next_specified_note = self.get_closest_specified_note_given_note(specified_chord[-1], next_chord, 'soprano')
+            next_specified_note = seed_notes[s]
+            specified_chord = self.get_specified_chord_from_note_and_chord(next_specified_note, next_chord, previous_specified_chord=specified_chord)
+            chords.append(specified_chord)
+        return chords
 
 
 class Note():
@@ -375,6 +387,7 @@ class SpecifiedChord(Chord):
 # out = m.get_next_chord_conditional("1", "A")
 # print(out)
 
-m = Music("D", ["F#"],[])
+m = Music("C", ["F"],[])
 # print(m.get_specified_chord_from_note_and_chord("F#4", ('D', 'F#', 'A'), previous_specified_chord=None))
-print(m.harmonize_one_note([m.seed_notes[0]+'4'], 1000))
+# print(m.harmonize_one_note([m.seed_notes[0]+'4'], 1000))
+print(m.harmonize_melody(["A4", "E4", "G4", "B4", "A4", "F4","G4"]))
