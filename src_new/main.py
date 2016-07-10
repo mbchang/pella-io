@@ -6,6 +6,12 @@ from write_midi import write_midifile, write_chords_to_pattern
 INPUT_MIDI = 'data/snippet10.mid'
 OUTPUT_FILE = 'data/output.mid'
 
+def parse_to_mid(input_file):
+	extension = input_file.split(".")[-1]
+	if extension == ".mid":
+		return
+	
+
 
 def main(input_midi):
 	# Read the input MIDI
