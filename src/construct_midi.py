@@ -34,6 +34,13 @@ def construct_midi(filename, bpm, trackname, beat_intervals):
 
 def _add_measure(acappella_measure, time_counter, my_midi):
 	track = 0 
+	if acappella_measure == None:
+		# Handle as a rest
+		my_midi.addNote(0,0,1,time_counter,1,0)
+		print "Warning: included a rest in the song"
+		time_counter += 4
+		return time_counter
+
 	attrs = ['bass', 'tenor', 'soprano', 'alto']
 	for attr in attrs:
 		notes = getattr(acappella_measure, attr)
@@ -48,6 +55,10 @@ def _add_measure(acappella_measure, time_counter, my_midi):
 			volume = 100
 			my_midi.addNote(track,channel,pitch,time_offset,duration,volume)
 			time_offset += duration
+
 	time_counter += 4
 	return time_counter
+
+
+def construct_midi_from_chords
 
