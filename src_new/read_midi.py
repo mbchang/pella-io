@@ -2,6 +2,13 @@ import midi_library
 
 def read_midi_by_measure(input_filename):
 	pattern = midi_library.read_midifile(input_filename)
+	if len(pattern) == 2:
+		# Merge the tracks - sometimes, the input MIDI has two tracks
+		del pattern[0][-1]  # remove the EndOfTrackEvent
+		for event in pattern[1]:
+			pattern[0].append(event)
+		del pattern[1]
+	print pattern
 	pattern.make_ticks_abs()
 	track = pattern[0]
 	

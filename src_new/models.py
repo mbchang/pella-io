@@ -10,14 +10,14 @@ class Note:
 
 class Chord:
 	"""A 4-note chord to be played."""
-	def __init__(self, low, mid, high):
+	def __init__(self, low, mid, high, highest):
 		self.low = Note(low, None)
 		self.mid = Note(mid, None)
 		self.high = Note(high, None)
-		self.highest = Note(self.compute_octave(), None)
+		self.highest = Note(highest, None)
 
 	def compute_octave(self):
-		# Create the soprano note
+		# Create the soprano note -- deprecated
 		low_freq = midi_num_to_freq[self.low.pitch]
 		oct_freq = low_freq * 2
 		oct_midi_num = self.compute_midi_num(oct_freq)
