@@ -224,7 +224,6 @@ def notes2mp3():
     # 2 save
     pass
 
-
 # index freq_map. assume we start at c1
 def notes2freq(notes):
     # notes (num_notes, timesteps); may not be onehot
@@ -239,7 +238,17 @@ def notes2freq(notes):
 
 # assume we start at c1
 def getFreqMap(num_octaves):
-    firstOctave = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+    freqMap = np.zeros(84)
+    freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+
+    for i in range(1, num_octaves - 1):
+        lo = 12 * (i - 1)
+        med = 12 * i
+        hi = 12 * (i + 1)
+        print(lo, med, hi)
+        freqMap[med : hi] = freqMap[lo : med] * 2
+
+    return freqMap
 
 def getBeatIntervalsFromNotes(notes_mask):
     beatIntervals = []
