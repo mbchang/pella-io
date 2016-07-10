@@ -8,7 +8,6 @@ def read_midi_by_measure(input_filename):
 		for event in pattern[1]:
 			pattern[0].append(event)
 		del pattern[1]
-	print pattern
 	pattern.make_ticks_abs()
 	track = pattern[0]
 	
