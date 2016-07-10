@@ -276,7 +276,8 @@ if __name__ == "__main__":
     notes = get_notes(chroma_sync_gram, 0.7)
     freqs = notes2freq(notes)
 
-    for_tejas = (freqs, beats)
+    beatIntevals = getBeatIntervalsFromNotes(notes, beats)
+    # for_tejas = (freqs, beats)
 
     print('beats',beats.shape)
     # res = np.array([beats, notes])
