@@ -1,11 +1,12 @@
 from __future__ import print_function
 import numpy as np
 import os
+import pprint
 import librosa
 import matplotlib.pyplot as plt
 print('#'*180)
 
-print(os.path.abspath())
+print(os.path.abspath(librosa.__file__))
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
@@ -15,6 +16,7 @@ y_mono = librosa.to_mono(y)
 print('y', y.shape)
 print('sr', sr)
 print('y_mono', y_mono.shape)
+# assert(False)
 
 # mel spectrogram
 def mel_spetrogram(y, sr):
@@ -147,7 +149,7 @@ def get_notes(cgram, threshold):
         row[row <= threshold] = 0
     return cgramT
 
-def decompose(y):
+def decompose(y, n_components=8):
     # How about something more advanced?  Let's decompose a spectrogram with NMF, and then resynthesize an individual component
     D = librosa.stft(y)
 
@@ -155,7 +157,7 @@ def decompose(y):
     S, phase = librosa.magphase(D)
 
     # Decompose by nmf
-    components, activations = librosa.decompose.decompose(S, n_components=8, sort=True)
+    components, activations = librosa.decompose.decompose(S, n_components, sort=True)
 
     plt.figure(figsize=(12,4))
 
@@ -174,7 +176,27 @@ def decompose(y):
     plt.tight_layout()
     plt.savefig('components_activations.png')
 
-    return components, activations
+    print('components', components.shape)
+    print('activations', activations.shape)
+    return components, activations, phase
+
+def reconstruct(components, activations, phase):
+    # Play back the reconstruction
+    # Reconstruct a spectrogram by the outer product of component k and its activation
+    D_k = components.dot(activations)
+
+    # invert the stft after putting the phase back in
+    y_k = librosa.istft(D_k * phase)
+    return y_k
+
+# is there a way to get the frequency range?
+def get_freq_component(y, k=4):
+    components, activations, phase = decompose(y)
+    D_k = np.multiply.outer(components[:, k], activations[k])
+
+    # invert the stft after putting the phase back in
+    y_k = librosa.istft(D_k * phase)
+    return y_k
 
 def beat_track(y_percussive, sr, log_S):
     # Now, let's run the beat tracker.
@@ -200,16 +222,23 @@ def notes2mp3():
     # 2 save
     pass
 
+
+# index to 
+def get_freq():
+    pass
+
+
+
 if __name__ == "__main__":
     log_S = mel_spetrogram(y, sr)
     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
     cgram = chromagram(y_harmonic, sr)
     tempo, beats = beat_track(y_percussive, sr, log_S)
-    components, activaions = decompose(y)
+    # components, activaions = decompose(y)
 
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
     notes = get_notes(chroma_sync_gram, 0.7)
-    print('notes', notes.shape)
+
     print('beats',beats.shape)
-    res = np.array([beats, notes])
+    # res = np.array([beats, notes])
