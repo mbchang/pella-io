@@ -4,14 +4,15 @@ import os
 import pprint
 import librosa
 import matplotlib.pyplot as plt
+from audio_models import BeatInterval
 print('#'*180)
 
 print(os.path.abspath(librosa.__file__))
 
 # load audio file
 audio_path = librosa.util.example_audio_file()
-# audio_path = '../audio/twinkle_twinkle.mp3'
-audio_path = '../audio/.mp3'
+audio_path = '../src/audio/twinkle_twinkle.mp3'
+# audio_path = '../audio/.mp3'
 y, sr = librosa.load(audio_path)
 y_mono = librosa.to_mono(y)
 print('y', y.shape)
@@ -232,13 +233,14 @@ def notes2freq(notes):
     freqs = []
     freq_map = getFreqMap(notes.shape[0])
     timesteps = notes.shape[1]
-    for t in timesteps:
+    for t in range(timesteps):
         freqs.append(freq_map[notes[t] > 0])
     return freqs
 
 # assume we start at c1
 def getFreqMap(num_octaves):
-    freqMap = np.zeros(84)
+    print(num_octaves)
+    freqMap = np.zeros(num_octaves*12)
     freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
 
     for i in range(1, num_octaves - 1):
@@ -257,14 +259,15 @@ def getBeatIntervalsFromNotes(notes_mask, beats):
 
     beatIntervals = []
     for i in range(timesteps):
-        lowest_freq = min(freqs)
-        frequenceis = freqs[i]
-        nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
+        lowest_freq = min(freqs[i])
+        frequencies = freqs[i]
+        mults = [1 for i in frequencies]
+        nextBeatInterval = BeatInterval(lowest_freq, frequencies, mults)
         beatIntervals.append(nextBeatInterval)
     return beatIntervals
 
 
-if __name__ == "__main__":
+def getTwinkle():
     log_S = mel_spetrogram(y, sr)
     y_harmonic, y_percussive = harmonics_and_percussive(y, sr)
     cgram = chromagram(y_harmonic, sr)
@@ -276,10 +279,11 @@ if __name__ == "__main__":
     notes = get_notes(chroma_sync_gram, 0.7)
     freqs = notes2freq(notes)
 
-    beatIntevals = getBeatIntervalsFromNotes(notes, beats)
+    beatIntervals = getBeatIntervalsFromNotes(notes, beats)
     # for_tejas = (freqs, beats)
 
     print('beats',beats.shape)
     # res = np.array([beats, notes])
     res = np.array([beats, notes])
     print(res)
+    return beatIntervals
