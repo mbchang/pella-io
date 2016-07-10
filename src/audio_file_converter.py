@@ -225,10 +225,34 @@ def notes2mp3():
     pass
 
 
-# index to
-def get_freq():
-    pass
+# index freq_map. assume we start at c1
+def notes2freq(notes):
+    # notes (num_notes, timesteps); may not be onehot
+    # map: (num_notes)
+    # output: (timesteps)
+    freqs = []
+    freq_map = getFreqMap(notes.shape[0])
+    timesteps = notes.shape[1]
+    for t in timesteps:
+        freqs.append(freq_map[notes[t] > 0])
+    return freqs
 
+# assume we start at c1
+def getFreqMap(num_octaves):
+    firstOctave = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
+
+def getBeatIntervalsFromNotes(notes_mask):
+    beatIntervals = []
+    for i in range(notes_mask.shape[0]):
+        j = 0
+        while notes_mask[i][j] == 0:
+            j += 1
+            if j == notes_mask.shape[1]:
+                break
+        lowest_freq = freq_conversions[j]
+        frequencies = freq_conversions[notes_mask[i]]
+        nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
+        beatIntervals.append(nextBeatInterval)
 
 
 if __name__ == "__main__":
@@ -241,6 +265,11 @@ if __name__ == "__main__":
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
     notes = get_notes(chroma_sync_gram, 0.7)
+    freqs = notes2freq(notes)
+
+    for_tejas = (freqs, beats)
 
     print('beats',beats.shape)
     # res = np.array([beats, notes])
+    res = np.array([beats, notes])
+    print(res)
