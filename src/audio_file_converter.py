@@ -250,18 +250,18 @@ def getFreqMap(num_octaves):
 
     return freqMap
 
-def getBeatIntervalsFromNotes(notes_mask):
+def getBeatIntervalsFromNotes(notes_mask, beats):
+    freqs= notes2freq(notes_mask)  # (timesteps, num_freqs) list
+    beats = [0]+beats  # (num_beats), not necessarily timesteps
+    timesteps = len(freqs)
+
     beatIntervals = []
-    for i in range(notes_mask.shape[0]):
-        j = 0
-        while notes_mask[i][j] == 0:
-            j += 1
-            if j == notes_mask.shape[1]:
-                break
-        lowest_freq = freq_conversions[j]
-        frequencies = freq_conversions[notes_mask[i]]
+    for i in range(timesteps):
+        lowest_freq = min(freqs)
+        frequenceis = freqs[i]
         nextBeatInterval = BeatInterval(lowest_freq, frequencies, 1)
         beatIntervals.append(nextBeatInterval)
+    return beatIntervals
 
 
 if __name__ == "__main__":
