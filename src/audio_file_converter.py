@@ -281,13 +281,13 @@ def getTwinkle():
     # print(notes.shape)
     freqs = notes2freq(notes)
 
-    # beatIntervals = getBeatIntervalsFromNotes(notes, beats)
-    # # for_tejas = (freqs, beats)
-    #
-    # print('beats',beats.shape)
-    # # res = np.array([beats, notes])
+    beatIntervals = getBeatIntervalsFromNotes(notes, beats)
+    # for_tejas = (freqs, beats)
+
+    print('beats',beats.shape)
     # res = np.array([beats, notes])
-    # print(res)
-    # return beatIntervals
+    res = np.array([beats, notes])
+    print(res)
+    return beatIntervals
 
 getTwinkle()
