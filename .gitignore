@@ -1,1 +1,3 @@
 scratch/librosa/*.png
+src/*.png
+node_modules/
