@@ -5,6 +5,7 @@
 
 from audio_models import BeatInterval
 from construct_midi import construct_midi
+from audio_file_converter import getTwinkle
 
 def main():
 	FILENAME = "output.mid"
@@ -24,7 +25,8 @@ def main():
 		frequencies,
 		multiplicity
 	)
-	beats = [bi, bi, bi, bi]
-	construct_midi(FILENAME, BPM, TRACKNAME, beats)
+	#beats = [bi, bi, bi, bi, bi]
+	beatIntervals = getTwinkle()
+	construct_midi(FILENAME, BPM, TRACKNAME, beatIntervals)
 
 main()
