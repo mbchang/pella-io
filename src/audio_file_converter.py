@@ -127,7 +127,7 @@ def chroma_sync(C, beats, aggregate=np.median, show=True):
     print('C_sync', C_sync.shape)
 
     if show == True:
-        plt.figure(figsize=(12,6))
+        plt.figure(figsize=(12,24))
         plt.subplot(2, 1, 1)
         librosa.display.specshow(C, sr=sr, y_axis='chroma', vmin=0.0, vmax=1.0, x_axis='time')
         plt.title('Chroma')
@@ -231,15 +231,16 @@ def notes2freq(notes):
     # map: (num_notes)
     # output: (timesteps)
     freqs = []
-    freq_map = getFreqMap(notes.shape[0])
-    timesteps = notes.shape[1]
+    timesteps, num_freqs  = notes.shape
+    print('notes', notes.shape)
+    assert num_freqs%12 == 0
+    freq_map = getFreqMap(num_freqs/12)
     for t in range(timesteps):
         freqs.append(freq_map[notes[t] > 0])
     return freqs
 
 # assume we start at c1
 def getFreqMap(num_octaves):
-    print(num_octaves)
     freqMap = np.zeros(num_octaves*12)
     freqMap[0:12] = [8.1757989156, 8.6619572180, 9.1770239974, 9.7227182413, 10.3008611535, 10.9133822323, 11.5623257097, 12.2498573744, 12.9782717994, 13.7500000000, 14.5676175474, 15.4338531643]
 
@@ -277,13 +278,16 @@ def getTwinkle():
     delta_mfcc, delta2_mfcc, M = mfcc(log_S)
     chroma_sync_gram = chroma_sync(cgram, beats)
     notes = get_notes(chroma_sync_gram, 0.7)
+    # print(notes.shape)
     freqs = notes2freq(notes)
 
-    beatIntervals = getBeatIntervalsFromNotes(notes, beats)
-    # for_tejas = (freqs, beats)
-
-    print('beats',beats.shape)
+    # beatIntervals = getBeatIntervalsFromNotes(notes, beats)
+    # # for_tejas = (freqs, beats)
+    #
+    # print('beats',beats.shape)
+    # # res = np.array([beats, notes])
     # res = np.array([beats, notes])
-    res = np.array([beats, notes])
-    print(res)
-    return beatIntervals
+    # print(res)
+    # return beatIntervals
+
+getTwinkle()
